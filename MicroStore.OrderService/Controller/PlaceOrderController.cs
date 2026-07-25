@@ -1,7 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-
-using MicroStore.OrderService.Application.Common.Messaging;
-using MicroStore.OrderService.Application.Events;
 using MicroStore.OrderService.Domain.Order.ValueObjects;
 using MicroStore.OrderService.DTO;
 using MicroStore.OrderService.Lock;
@@ -135,13 +132,6 @@ public class PlaceOrderController : ControllerBase
                 .PublishAsync(
                     "order-placed",
                     JsonSerializer.Serialize(orderDto));
-
-            var @event = new OrderCreatedEvent(
-                    Guid.NewGuid(),
-                    Guid.NewGuid(),
-                    5000);
-            await _eventBus.PublishAsync(@event);
-
 
             // پاسخ موفق  
             return Ok(new
