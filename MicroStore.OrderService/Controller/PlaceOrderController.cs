@@ -15,17 +15,15 @@ namespace MicroStore.OrderService.Controllers;
 public class PlaceOrderController : ControllerBase
 {
     private readonly IConnectionMultiplexer _redis;
-    private readonly IEventBus _eventBus;
     private readonly ILogger<Domain.Order.AggregateRoot.Order> _logger;
     private readonly AppDbContext _context;
     private readonly IDistributedLockService _distributedLockService;
-    public PlaceOrderController(ILogger<Domain.Order.AggregateRoot.Order> logger, IConnectionMultiplexer connectionMultiplexer, AppDbContext appDbContext, IDistributedLockService distributedLockService, IEventBus eventBus)
+    public PlaceOrderController(ILogger<Domain.Order.AggregateRoot.Order> logger, IConnectionMultiplexer connectionMultiplexer, AppDbContext appDbContext, IDistributedLockService distributedLockService )
     {
         _logger = logger;
         _redis = connectionMultiplexer;
         _context = appDbContext;
         _distributedLockService = distributedLockService;
-        _eventBus = eventBus;
     }
 
     [HttpPost]
