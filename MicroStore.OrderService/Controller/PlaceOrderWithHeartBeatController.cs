@@ -1,7 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-
-using MicroStore.OrderService.Application.Common.Messaging;
-using MicroStore.OrderService.Application.Events;
 using MicroStore.OrderService.Domain.Order.ValueObjects;
 using MicroStore.OrderService.DTO;
 using MicroStore.OrderService.LockWithHeartBeat;
@@ -18,17 +15,16 @@ namespace MicroStore.OrderService.Controllers;
 public class PlaceOrderWithHeartBeatController : ControllerBase
 {
     private readonly IConnectionMultiplexer _redis;
-    private readonly IEventBus _eventBus;
     private readonly ILogger<Domain.Order.AggregateRoot.Order> _logger;
     private readonly AppDbContext _context;
     private readonly IDistributedLockServiceWithHeartBeat _distributedLockServiceWithHeartBeat;
-    public PlaceOrderWithHeartBeatController(ILogger<Domain.Order.AggregateRoot.Order> logger, IConnectionMultiplexer connectionMultiplexer, AppDbContext appDbContext, IDistributedLockServiceWithHeartBeat distributedLockServiceWithHeartBeat, IEventBus eventBus)
+    public PlaceOrderWithHeartBeatController(ILogger<Domain.Order.AggregateRoot.Order> logger, IConnectionMultiplexer connectionMultiplexer, AppDbContext appDbContext, IDistributedLockServiceWithHeartBeat distributedLockServiceWithHeartBeat )
     {
         _logger = logger;
         _redis = connectionMultiplexer;
         _context = appDbContext;
         _distributedLockServiceWithHeartBeat = distributedLockServiceWithHeartBeat;
-        _eventBus = eventBus;
+        
     }
 
     [HttpPost]
@@ -115,13 +111,6 @@ public class PlaceOrderWithHeartBeatController : ControllerBase
                 .PublishAsync(
                     "order-placed",
                     JsonSerializer.Serialize(orderDto));
-
-            var @event = new OrderCreatedEvent(
-                    Guid.NewGuid(),
-                    Guid.NewGuid(),
-                    5000);
-            await _eventBus.PublishAsync(@event);
-
 
             // پاسخ موفق  
             return Ok(new
