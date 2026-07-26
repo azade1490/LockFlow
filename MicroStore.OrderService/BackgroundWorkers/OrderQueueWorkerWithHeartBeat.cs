@@ -59,7 +59,7 @@ public sealed class OrderQueueWorkerWithHeartBeat : BackgroundService
         // مثال: lock:product:1001
         var lockKey = $"lock:product:{orderDto.ProductId}";
 
-        var lockHandle = await _distributedLockServiceWithHeartBeat.AcquireAsync(lockKey);
+        await using var lockHandle = await _distributedLockServiceWithHeartBeat.AcquireAsync(lockKey);
 
         // اگر قفل در اختیار درخواست دیگری باشد
         //اگر از صف RabbitMQ استفاده کنیم نیازی به برگرداندن سفارش به صف نیست چون از حذف حذف نشده است
