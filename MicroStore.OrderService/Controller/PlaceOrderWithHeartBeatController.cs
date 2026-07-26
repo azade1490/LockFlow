@@ -37,7 +37,7 @@ public class PlaceOrderWithHeartBeatController : ControllerBase
         // مثال: lock:product:1001
         var lockKey = $"lock:product:{orderDto.ProductId}";
 
-        var lockHandle = await _distributedLockServiceWithHeartBeat.AcquireAsync(lockKey);
+        await using var lockHandle = await _distributedLockServiceWithHeartBeat.AcquireAsync(lockKey);
 
         // اگر قفل در اختیار درخواست دیگری باشد  
         if (lockHandle == null)
