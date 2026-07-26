@@ -85,7 +85,20 @@ public class PlaceOrderController : ControllerBase
             });
             //پایان Heartbeat
 
-            var currentStock = 100;//باید از سرویس Inventory خوانده شود
+            //باید از سرویس Inventory خوانده شود
+            var stockKey = $"product:stock:{orderDto.ProductId}";
+            var stockValue = await db.StringGetAsync(stockKey);
+
+            if (!stockValue.HasValue)
+            {
+                _logger.LogWarning(
+                "Stock not found for product {ProductId}",
+                orderDto.ProductId);
+
+                continue;
+            }
+
+            var currentStock = int.Parse(stockValue);
 
             // بررسی کافی بودن موجودی  
             if (currentStock < orderDto.Quantity)
