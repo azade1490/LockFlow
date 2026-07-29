@@ -8,7 +8,7 @@ var scenario = Scenario.Create("create_order", async context =>
     var response = await Step.Run("post_order", context, async () =>
     {
         var httpResponse = await client.PostAsync(
-            "http://localhost:5001/PlaceOrder/PlaceOrderWithHeartBeat",
+            "http://localhost:5001/PlaceOrder/PlaceOrder",
             new StringContent(
                 """
                 {
