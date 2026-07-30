@@ -12,15 +12,12 @@ public sealed class Order : AggregateRoot<Guid>
 
     public Order(Guid orderId,Address shippingAddress)
     {
-        Id = Guid.NewGuid();
-        OrderId = orderId;
+        Id = orderId;
         Status = OrderStatus.Pending;
         CreatedAtUtc = DateTime.UtcNow;
         ShippingAddress = shippingAddress;
     }
-
-    public Guid OrderId { get; private set; }
-
+    
     public OrderStatus Status { get; private set; }
     public PaymentStatus PaymentStatus { get; private set; }
 
