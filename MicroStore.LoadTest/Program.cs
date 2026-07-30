@@ -40,7 +40,7 @@ var scenario = Scenario.Create("create_order", async context =>
 //اگر پاسخ API سریع باشد مثلاً 100 ms
 //هر کاربر حدود 10 درخواست در ثانیه ارسال می کند و در مجموع نزدیک به
 //10 × 10 = 100 Request / s
-        copies: 100,
+        copies: 10,
         during: TimeSpan.FromSeconds(10))
 );
 
