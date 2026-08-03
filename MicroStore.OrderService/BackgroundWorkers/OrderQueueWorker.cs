@@ -62,7 +62,7 @@ public sealed class OrderQueueWorker : BackgroundService
         var lockHandle = await _distributedLockService.AcquireAsync(lockKey);
 
         // اگر قفل در اختیار درخواست دیگری باشد
-        //اگر از صف RabbitMQ استفاده کنیم نیازی به برگرداندن سفارش به صف نیست چون از حذف حذف نشده است
+        //اگر از صف RabbitMQ استفاده کنیم نیازی به برگرداندن سفارش به صف نیست چون از صف حذف نشده است
         if (lockHandle == null)
         {
             // هنوز شخص دیگری در حال پردازش همین محصول است.
