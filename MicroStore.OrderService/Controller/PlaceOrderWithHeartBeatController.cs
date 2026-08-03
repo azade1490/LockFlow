@@ -36,7 +36,8 @@ public class PlaceOrderWithHeartBeatController : ControllerBase
         // ساخت کلید قفل برای این محصول
         // مثال: lock:product:1001
         var lockKey = $"lock:product:{orderDto.ProductId}";
-
+        
+        // در پایان بلاک قفل به صورت اتوماتیک آزاد می‌شود.
         await using var lockHandle = await _distributedLockServiceWithHeartBeat.AcquireAsync(lockKey);
 
         // اگر قفل در اختیار درخواست دیگری باشد  
