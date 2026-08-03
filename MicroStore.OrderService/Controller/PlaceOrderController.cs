@@ -46,13 +46,11 @@ public class PlaceOrderController : ControllerBase
             // تا بعداً توسط Worker پردازش شود.  
             await db.ListRightPushAsync("order-queue", JsonSerializer.Serialize(orderDto));
 
-            // ثبت لاگ  
             _logger.LogInformation(
                 "Order {OrderId} queued because lock for ProductId {ProductId} was unavailable.",
                 orderDto.ID,
                 orderDto.ProductId);
 
-            // پاسخ به کاربر  
             return Accepted(new
             {
                 orderDto.ID,
