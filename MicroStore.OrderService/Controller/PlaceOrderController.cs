@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+ُ﻿using Microsoft.AspNetCore.Mvc;
 
 using MicroStore.OrderService.Domain.Order.ValueObjects;
 using MicroStore.OrderService.DTO;
@@ -147,7 +147,7 @@ public class PlaceOrderController : ControllerBase
                 .PublishAsync(
                     "order-placed",
                     JsonSerializer.Serialize(orderDto));
-            // پاسخ موفق  
+            
             return Ok(new
             {
                 orderDto.ID,
