@@ -153,14 +153,6 @@ public class PlaceOrderController : ControllerBase
                 .PublishAsync(
                     "order-placed",
                     JsonSerializer.Serialize(orderDto));
-
-            var @event = new OrderCreatedEvent(
-                    Guid.NewGuid(),
-                    Guid.NewGuid(),
-                    5000);
-            await _eventBus.PublishAsync(@event);
-
-
             // پاسخ موفق  
             return Ok(new
             {
