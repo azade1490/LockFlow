@@ -1,7 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
-using MicroStore.OrderService.Application.Common.Messaging;
-using MicroStore.OrderService.Application.Events;
 using MicroStore.OrderService.Domain.Order.ValueObjects;
 using MicroStore.OrderService.DTO;
 using MicroStore.OrderService.Lock;
