@@ -52,7 +52,6 @@ public class PlaceOrderWithHeartBeatController : ControllerBase
                 orderDto.ID,
                 orderDto.ProductId);
 
-            // پاسخ به کاربر  
             return Accepted(new
             {
                 orderDto.ID,
