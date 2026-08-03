@@ -128,7 +128,6 @@ public class PlaceOrderWithHeartBeatController : ControllerBase
                     "order-placed",
                     JsonSerializer.Serialize(orderDto));
 
-            // پاسخ موفق  
             return Ok(new
             {
                 orderDto.ID,
