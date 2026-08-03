@@ -16,17 +16,15 @@ namespace MicroStore.OrderService.Controllers;
 public class PlaceOrderWithHeartBeatController : ControllerBase
 {
     private readonly IConnectionMultiplexer _redis;
-    private readonly IEventBus _eventBus;
-    private readonly ILogger<Domain.Order.AggregateRoot.Order> _logger;
+        private readonly ILogger<Domain.Order.AggregateRoot.Order> _logger;
     private readonly AppDbContext _context;
     private readonly IDistributedLockServiceWithHeartBeat _distributedLockServiceWithHeartBeat;
-    public PlaceOrderWithHeartBeatController(ILogger<Domain.Order.AggregateRoot.Order> logger, IConnectionMultiplexer connectionMultiplexer, AppDbContext appDbContext, IDistributedLockServiceWithHeartBeat distributedLockServiceWithHeartBeat, IEventBus eventBus)
+    public PlaceOrderWithHeartBeatController(ILogger<Domain.Order.AggregateRoot.Order> logger, IConnectionMultiplexer connectionMultiplexer, AppDbContext appDbContext, IDistributedLockServiceWithHeartBeat distributedLockServiceWithHeartBeat)
     {
         _logger = logger;
         _redis = connectionMultiplexer;
         _context = appDbContext;
         _distributedLockServiceWithHeartBeat = distributedLockServiceWithHeartBeat;
-        _eventBus = eventBus;
     }
 
     [HttpPost]
