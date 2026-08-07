@@ -129,19 +129,13 @@ public class PlaceOrderController : ControllerBase
             await db.StringSetAsync(
                 stockKey,
                 currentStock);
-
-            // اطلاعات سفارش را تکمیل می‌کنیم  
+                
             orderDto.ID = Guid.NewGuid();
-
             Address address = new Address("Iran", "Tehran", "Tehran", "street", "123456789");
-
-            // ساخت موجودیت سفارش  
             var order = new MicroStore.OrderService.Domain.Order.AggregateRoot.Order(orderDto.ID, address);
-
             Money money = new Money(1000000000, "IRR");
             order.AddItem(Guid.NewGuid(), "LapTop", money, 2);
 
-            // ذخیره سفارش در پایگاه داده  
             _context.Orders.Add(order);
             await _context.SaveChangesAsync();
 
