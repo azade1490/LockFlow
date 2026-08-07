@@ -53,7 +53,6 @@ public class PlaceOrderController : ControllerBase
 
             return Accepted(new
             {
-                orderDto.ID,
                 Message = "Your order has been queued and will be processed shortly."
             });
         }
@@ -103,9 +102,11 @@ public class PlaceOrderController : ControllerBase
                 _logger.LogWarning(
                 "Stock not found for product {ProductId}",
                 orderDto.ProductId);
-                return BadRequest((
-                "Stock not found for product {ProductId}",
-                orderDto.ProductId));
+                
+                return BadRequest(new ProblemDetails
+                {
+                    Detail = $"Stock not found for product {orderDto.ProductId}"
+                });
             }
 
             var currentStock = int.Parse(stockValue);
@@ -117,9 +118,10 @@ public class PlaceOrderController : ControllerBase
                     "Insufficient stock for ProductId: {ProductId}",
                     orderDto.ProductId);
 
-                return BadRequest((
-                    "Insufficient stock for ProductId: {ProductId}",
-                    orderDto.ProductId));
+                return BadRequest(new ProblemDetails
+                {
+                    Detail = $"Insufficient stock for ProductId: {orderDto.ProductId}"
+                });
             }
 
             // محاسبه موجودی جدید  
