@@ -80,11 +80,8 @@ public sealed class OrderQueueWorkerWithHeartBeat : BackgroundService
             // -------------------------------  
             // از اینجا به بعد قفل با موفقیت گرفته شده است.  
             // -------------------------------  
-
-            // کلید موجودی محصول  
+  
             var stockKey = $"product:stock:{orderDto.ProductId}";
-
-            //if(await db.KeyExistsAsync(stockKey))
 
             //// خواندن موجودی از Redis  
             var stockValue = await db.StringGetAsync(stockKey);
@@ -98,7 +95,6 @@ public sealed class OrderQueueWorkerWithHeartBeat : BackgroundService
                 return;
             }
 
-            // تبدیل مقدار موجودی به عدد  
             int currentStock = int.Parse(stockValue);
 
             // بررسی کافی بودن موجودی  
@@ -126,14 +122,9 @@ public sealed class OrderQueueWorkerWithHeartBeat : BackgroundService
                 scope.ServiceProvider
                      .GetRequiredService<AppDbContext>();
 
-            // اطلاعات سفارش را تکمیل می‌کنیم  
             orderDto.ID = Guid.NewGuid();
-
             Address address = new Address("Iran", "Tehran", "Tehran", "street", "123456789");
-
-            // ساخت موجودیت سفارش  
             var order = new MicroStore.OrderService.Domain.Order.AggregateRoot.Order(orderDto.ID, address);
-
             var money = new Money(1000000000, "IRR");
             order.AddItem(Guid.NewGuid(), "LapTop", money, 2);
 
