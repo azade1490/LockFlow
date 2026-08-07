@@ -1,4 +1,4 @@
-﻿using MicroStore.OrderService.Domain.Common;
+using MicroStore.OrderService.Domain.Common;
 using MicroStore.OrderService.Domain.Order.Entities;
 using MicroStore.OrderService.Domain.Order.Enums;
 using MicroStore.OrderService.Domain.Order.ValueObjects;
@@ -10,9 +10,9 @@ public sealed class Order : AggregateRoot<Guid>
 
     private Order() { } // EF Core
 
-    public Order(Guid orderId,Address shippingAddress)
+    public Order(Address shippingAddress)
     {
-        Id = orderId;
+        Id = Guid.NewGuid();
         Status = OrderStatus.Pending;
         CreatedAtUtc = DateTime.UtcNow;
         ShippingAddress = shippingAddress;
