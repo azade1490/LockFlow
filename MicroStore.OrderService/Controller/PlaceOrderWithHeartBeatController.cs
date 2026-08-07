@@ -65,10 +65,15 @@ public class PlaceOrderWithHeartBeatController : ControllerBase
             // از اینجا به بعد قفل با موفقیت گرفته شده است.  
             // -------------------------------  
 
-            //باید از سرویس Inventory خوانده شود
             var stockKey = $"product:stock:{orderDto.ProductId}";
 
-            //if(await db.KeyExistsAsync(stockKey))
+            // مقدار stock باید از سرویس Inventory خوانده شود ولی اینجا برای تست مقدار stock را در Redis ذخیره میکنیم
+            if (!await db.KeyExistsAsync(stockKey))
+            {
+                await db.StringSetAsync(
+                    stockKey,
+                    100
+                    );
 
             //// خواندن موجودی از Redis  
             var stockValue = await db.StringGetAsync(stockKey);
