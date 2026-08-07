@@ -16,7 +16,7 @@ namespace MicroStore.OrderService.Controllers;
 public class PlaceOrderWithHeartBeatController : ControllerBase
 {
     private readonly IConnectionMultiplexer _redis;
-        private readonly ILogger<Domain.Order.AggregateRoot.Order> _logger;
+    private readonly ILogger<Domain.Order.AggregateRoot.Order> _logger;
     private readonly AppDbContext _context;
     private readonly IDistributedLockServiceWithHeartBeat _distributedLockServiceWithHeartBeat;
     public PlaceOrderWithHeartBeatController(ILogger<Domain.Order.AggregateRoot.Order> logger, IConnectionMultiplexer connectionMultiplexer, AppDbContext appDbContext, IDistributedLockServiceWithHeartBeat distributedLockServiceWithHeartBeat)
@@ -48,13 +48,11 @@ public class PlaceOrderWithHeartBeatController : ControllerBase
             await db.ListRightPushAsync("order-queue", JsonSerializer.Serialize(orderDto));
 
             _logger.LogInformation(
-                "Order {OrderId} queued because lock for ProductId {ProductId} was unavailable.",
-                orderDto.ID,
+                "Order queued because lock for ProductId {ProductId} was unavailable.",
                 orderDto.ProductId);
 
             return Accepted(new
             {
-                orderDto.ID,
                 Message = "Your order has been queued and will be processed shortly."
             });
         }
@@ -84,9 +82,11 @@ public class PlaceOrderWithHeartBeatController : ControllerBase
                 _logger.LogWarning(
                 "Stock not found for product {ProductId}",
                 orderDto.ProductId);
-                return BadRequest((
-                "Stock not found for product {ProductId}",
-                orderDto.ProductId));
+
+                return BadRequest(new ProblemDetails
+                {
+                    Detail = $"Stock not found for product {orderDto.ProductId}"
+                });
             }
 
             var currentStock = int.Parse(stockValue);
@@ -98,9 +98,10 @@ public class PlaceOrderWithHeartBeatController : ControllerBase
                     "Insufficient stock for ProductId: {ProductId}",
                     orderDto.ProductId);
 
-                return BadRequest((
-                    "Insufficient stock for ProductId: {ProductId}",
-                    orderDto.ProductId));
+                return BadRequest(new ProblemDetails
+                {
+                    Detail = $"Insufficient stock for ProductId: {orderDto.ProductId}"
+                });
             }
 
             // محاسبه موجودی جدید  
@@ -111,9 +112,8 @@ public class PlaceOrderWithHeartBeatController : ControllerBase
                 stockKey,
                 currentStock);
 
-            orderDto.ID = Guid.NewGuid();
             Address address = new Address("Iran", "Tehran", "Tehran", "street", "123456789");
-            var order = new MicroStore.OrderService.Domain.Order.AggregateRoot.Order(orderDto.ID, address);
+            var order = new MicroStore.OrderService.Domain.Order.AggregateRoot.Order(address);
             Money money = new Money(1000000000, "IRR");
             order.AddItem(Guid.NewGuid(), "LapTop", money, orderDto.Quantity);
 
@@ -130,7 +130,7 @@ public class PlaceOrderWithHeartBeatController : ControllerBase
 
             return Ok(new
             {
-                orderDto.ID,
+                order.Id,
                 Message = ("order { OrderId} processed.", order.Id)
             });
         }
