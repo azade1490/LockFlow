@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 
 using MicroStore.OrderService.Domain.Order.ValueObjects;
 using MicroStore.OrderService.DTO;
@@ -47,13 +47,12 @@ public class PlaceOrderController : ControllerBase
             await db.ListRightPushAsync("order-queue", JsonSerializer.Serialize(orderDto));
 
             _logger.LogInformation(
-                "Order {OrderId} queued because lock for ProductId {ProductId} was unavailable.",
-                orderDto.ID,
+                "Order queued because lock for ProductId {ProductId} was unavailable.",
                 orderDto.ProductId);
 
             return Accepted(new
             {
-                Message = "Your order has been queued and will be processed shortly."
+                Message = "Your order has been queued and will be processed shortly." 
             });
         }
 
@@ -102,10 +101,10 @@ public class PlaceOrderController : ControllerBase
                 _logger.LogWarning(
                 "Stock not found for product {ProductId}",
                 orderDto.ProductId);
-                
+
                 return BadRequest(new ProblemDetails
                 {
-                    Detail = $"Stock not found for product {orderDto.ProductId}"
+                    Detail=$"Stock not found for product {orderDto.ProductId}"                    
                 });
             }
 
@@ -120,7 +119,7 @@ public class PlaceOrderController : ControllerBase
 
                 return BadRequest(new ProblemDetails
                 {
-                    Detail = $"Insufficient stock for ProductId: {orderDto.ProductId}"
+                    Detail = $"Insufficient stock for ProductId: {orderDto.ProductId}"                    
                 });
             }
 
@@ -132,9 +131,8 @@ public class PlaceOrderController : ControllerBase
                 stockKey,
                 currentStock);
                 
-            orderDto.ID = Guid.NewGuid();
             Address address = new Address("Iran", "Tehran", "Tehran", "street", "123456789");
-            var order = new MicroStore.OrderService.Domain.Order.AggregateRoot.Order(orderDto.ID, address);
+            var order = new MicroStore.OrderService.Domain.Order.AggregateRoot.Order(address);
             Money money = new Money(1000000000, "IRR");
             order.AddItem(Guid.NewGuid(), "LapTop", money, orderDto.Quantity);
 
@@ -151,7 +149,7 @@ public class PlaceOrderController : ControllerBase
             
             return Ok(new
             {
-                orderDto.ID,
+                order.Id,
                 Message = ("order { OrderId} processed.",order.Id)
             });
         }
