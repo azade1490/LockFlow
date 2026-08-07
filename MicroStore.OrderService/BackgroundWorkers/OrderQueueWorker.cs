@@ -114,7 +114,6 @@ public sealed class OrderQueueWorker : BackgroundService
                 return;
             }
 
-            // تبدیل مقدار موجودی به عدد  
             int currentStock = int.Parse(stockValue);
 
             // بررسی کافی بودن موجودی  
