@@ -1,4 +1,4 @@
-﻿
+
 using MicroStore.OrderService.Domain.Common;
 using MicroStore.OrderService.Domain.Order.ValueObjects;
 
@@ -13,6 +13,7 @@ public sealed class OrderItem:Entity<Guid>
         Money unitPrice,
         int quantity)
     {
+        Id = Guid.NewGuid();
         ProductId = productId;
         ProductName = productName;
         UnitPrice = unitPrice;
