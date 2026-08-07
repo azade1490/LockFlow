@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 
 using MicroStore.OrderService.Domain.Order.ValueObjects;
 using MicroStore.OrderService.DTO;
