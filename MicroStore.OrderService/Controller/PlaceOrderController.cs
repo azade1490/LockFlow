@@ -93,6 +93,7 @@ public class PlaceOrderController : ControllerBase
                     stockKey,
                     100
                     );
+            }
 
             //// خواندن موجودی از Redis  
             var stockValue = await db.StringGetAsync(stockKey);
@@ -151,7 +152,6 @@ public class PlaceOrderController : ControllerBase
                 orderDto.ID,
                 Message = ("order { OrderId} processed.",order.Id)
             });
-        }
         }
         catch (Exception ex)
         {
