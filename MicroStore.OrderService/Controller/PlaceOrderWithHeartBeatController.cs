@@ -115,7 +115,7 @@ public class PlaceOrderWithHeartBeatController : ControllerBase
             Address address = new Address("Iran", "Tehran", "Tehran", "street", "123456789");
             var order = new MicroStore.OrderService.Domain.Order.AggregateRoot.Order(orderDto.ID, address);
             Money money = new Money(1000000000, "IRR");
-            order.AddItem(Guid.NewGuid(), "LapTop", money, 2);
+            order.AddItem(Guid.NewGuid(), "LapTop", money, orderDto.Quantity);
 
             _context.Orders.Add(order);
             await _context.SaveChangesAsync();
