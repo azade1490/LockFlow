@@ -1,4 +1,4 @@
-﻿using MicroStore.OrderService.Domain.Order.ValueObjects;
+using MicroStore.OrderService.Domain.Order.ValueObjects;
 using MicroStore.OrderService.DTO;
 using MicroStore.OrderService.Lock;
 using MicroStore.OrderService.Persistence.Data;
@@ -33,6 +33,7 @@ public sealed class OrderQueueWorker : BackgroundService
         {
             //اولین آیتم رو از صف میخونه و حذف میکنه
             RedisValue value =await db.ListLeftPopAsync("order-queue");
+
 
             if (!value.HasValue)
             {
@@ -141,9 +142,8 @@ public sealed class OrderQueueWorker : BackgroundService
                 scope.ServiceProvider
                      .GetRequiredService<AppDbContext>();
 
-            orderDto.ID = Guid.NewGuid();
             Address address = new Address("Iran", "Tehran", "Tehran", "street", "123456789");
-            var order = new MicroStore.OrderService.Domain.Order.AggregateRoot.Order(orderDto.ID, address);
+            var order = new MicroStore.OrderService.Domain.Order.AggregateRoot.Order(address);
             var money = new Money(1000000000, "IRR");
             order.AddItem(Guid.NewGuid(), "LapTop", money, orderDto.Quantity);
 
@@ -161,7 +161,7 @@ public sealed class OrderQueueWorker : BackgroundService
 
             _logger.LogInformation(
                 "Queued order {OrderId} processed.",
-                orderDto.ID);
+                order.Id);
         }
         catch (Exception ex)
         {
