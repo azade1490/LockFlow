@@ -74,6 +74,7 @@ public class PlaceOrderWithHeartBeatController : ControllerBase
                     stockKey,
                     100
                     );
+            }
 
             //// خواندن موجودی از Redis  
             var stockValue = await db.StringGetAsync(stockKey);
@@ -132,7 +133,6 @@ public class PlaceOrderWithHeartBeatController : ControllerBase
                 orderDto.ID,
                 Message = ("order { OrderId} processed.", order.Id)
             });
-        }
         }
         catch (Exception ex)
         {
