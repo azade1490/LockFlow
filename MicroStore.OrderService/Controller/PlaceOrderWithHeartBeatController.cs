@@ -88,7 +88,6 @@ public class PlaceOrderWithHeartBeatController : ControllerBase
                 orderDto.ProductId));
             }
 
-            // تبدیل مقدار موجودی به عدد  
             var currentStock = int.Parse(stockValue);
 
             // بررسی کافی بودن موجودی  
