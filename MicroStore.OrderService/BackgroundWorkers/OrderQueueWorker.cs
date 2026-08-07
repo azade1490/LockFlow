@@ -145,7 +145,7 @@ public sealed class OrderQueueWorker : BackgroundService
             Address address = new Address("Iran", "Tehran", "Tehran", "street", "123456789");
             var order = new MicroStore.OrderService.Domain.Order.AggregateRoot.Order(orderDto.ID, address);
             var money = new Money(1000000000, "IRR");
-            order.AddItem(Guid.NewGuid(), "LapTop", money, 2);
+            order.AddItem(Guid.NewGuid(), "LapTop", money, orderDto.Quantity);
 
             context.Orders.Add(order);
 
