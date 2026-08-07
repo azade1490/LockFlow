@@ -52,7 +52,7 @@ NBomberRunner
 ////روش ارسال 1000 درخواست همزمان با httpClient
 //var client = new HttpClient
 //{
-//    BaseAddress = new Uri("https://localhost:5001")
+//    BaseAddress = new Uri("http://localhost:5001")
 //};
 
 //const int requestCount = 1000;
@@ -64,7 +64,7 @@ NBomberRunner
 //    {
 //        await start.Task; // منتظر شروع همزمان
 
-//        var response = await client.PostAsJsonAsync("/api/orders", new
+//        var response = await client.PostAsJsonAsync("/PlaceOrder/PlaceOrder", new
 //        {
 //            productId = 1,
 //            quantity = 1
