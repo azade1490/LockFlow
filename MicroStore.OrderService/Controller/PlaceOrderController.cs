@@ -149,9 +149,9 @@ public class PlaceOrderController : ControllerBase
             return Ok(new
             {
                 orderDto.ID,
-                Message = ("order { OrderId} processed.",order.OrderId)
+                Message = ("order { OrderId} processed.",order.Id)
             });
-
+        }
         }
         catch (Exception ex)
         {
