@@ -1,7 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 
-using MicroStore.OrderService.Application.Messaging;
-using MicroStore.OrderService.Infrastracture.Messaging;
 using MicroStore.OrderService.Lock;
 using MicroStore.OrderService.LockWithHeartBeat;
 using MicroStore.OrderService.Persistence.Data;
