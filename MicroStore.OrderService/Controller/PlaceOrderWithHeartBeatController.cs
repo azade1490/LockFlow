@@ -68,9 +68,12 @@ public class PlaceOrderWithHeartBeatController : ControllerBase
             // مقدار stock باید از سرویس Inventory خوانده شود ولی اینجا برای تست مقدار stock را در Redis ذخیره میکنیم
             if (!await db.KeyExistsAsync(stockKey))
             {
-                await db.StringSetAsync(
+                var expiry = TimeSpan.FromSeconds(60);
+                
+                bool success =await db.StringSetAsync(
                     stockKey,
-                    100
+                    100,
+                    expiry
                     );
             }
 
