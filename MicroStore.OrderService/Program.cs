@@ -27,6 +27,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(configuration.GetConnectionString("ConnectionStringStoreDb"));
 });
 
+// این تنظیمات باعث می‌شود تمام BackgroundServiceها به جای اینکه یکی‌یکی شروع یا متوقف شوند، همزمان (Concurrent) شروع و متوقف شوند.
 builder.Services.Configure<HostOptions>(options =>
 {
     options.ServicesStartConcurrently = true;
