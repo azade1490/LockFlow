@@ -27,6 +27,14 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(configuration.GetConnectionString("ConnectionStringStoreDb"));
 });
 
+builder.Services.Configure<HostOptions>(options =>
+{
+    options.ServicesStartConcurrently = true;
+    options.ServicesStopConcurrently = true;
+});
+builder.Services.AddHostedService<OrderQueueWorker>();
+builder.Services.AddHostedService<OrderQueueWorkerWithHeartBeat>();
+
 builder.Services.AddScoped<IDistributedLockService, DistributedLockService>();
 builder.Services.AddScoped<IDistributedLockServiceWithHeartBeat, DistributedLockServiceWithHeartBeat>();
 
