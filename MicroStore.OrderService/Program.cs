@@ -36,8 +36,8 @@ builder.Services.Configure<HostOptions>(options =>
 builder.Services.AddHostedService<OrderQueueWorker>();
 builder.Services.AddHostedService<OrderQueueWorkerWithHeartBeat>();
 
-builder.Services.AddScoped<IDistributedLockService, DistributedLockService>();
-builder.Services.AddScoped<IDistributedLockServiceWithHeartBeat, DistributedLockServiceWithHeartBeat>();
+builder.Services.AddSingleton<IDistributedLockService, DistributedLockService>();
+builder.Services.AddSingleton<IDistributedLockServiceWithHeartBeat, DistributedLockServiceWithHeartBeat>();
 
 var app = builder.Build();
 
