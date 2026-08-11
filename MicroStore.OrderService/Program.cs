@@ -27,6 +27,9 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(configuration.GetConnectionString("ConnectionStringStoreDb"));
 });
 
+builder.Services.AddSingleton<IDistributedLockService, DistributedLockService>();
+builder.Services.AddSingleton<IDistributedLockServiceWithHeartBeat, DistributedLockServiceWithHeartBeat>();
+
 // این تنظیمات باعث می‌شود تمام BackgroundServiceها به جای اینکه یکی‌یکی شروع یا متوقف شوند، همزمان (Concurrent) شروع و متوقف شوند.
 builder.Services.Configure<HostOptions>(options =>
 {
@@ -35,9 +38,6 @@ builder.Services.Configure<HostOptions>(options =>
 });
 builder.Services.AddHostedService<OrderQueueWorker>();
 builder.Services.AddHostedService<OrderQueueWorkerWithHeartBeat>();
-
-builder.Services.AddSingleton<IDistributedLockService, DistributedLockService>();
-builder.Services.AddSingleton<IDistributedLockServiceWithHeartBeat, DistributedLockServiceWithHeartBeat>();
 
 var app = builder.Build();
 
