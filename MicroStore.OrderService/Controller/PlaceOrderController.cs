@@ -80,6 +80,7 @@ public class PlaceOrderController : ControllerBase
                     }
                 }
             });
+            cts.Cancel();
             //پایان Heartbeat
 
             var stockKey = $"product:stock:{orderDto.ProductId}";
