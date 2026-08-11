@@ -122,7 +122,7 @@ public sealed class OrderQueueWorker : BackgroundService
             if (currentStock < orderDto.Quantity)
             {
                 _logger.LogWarning(
-                    "Insufficient stock for {ProductId}",
+                    "Insufficient stock for ProductId: {ProductId}",
                     orderDto.ProductId);
 
                 return;
