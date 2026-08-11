@@ -99,6 +99,7 @@ public sealed class OrderQueueWorker : BackgroundService
                     }
                 }
             });
+          cts.Cancel();  
             //پایان Heartbeat
 
             var stockKey = $"product:stock:{orderDto.ProductId}";
