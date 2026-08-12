@@ -1,0 +1,18 @@
+@LockFlow.OrderService_HostAddress = http://localhost:5001
+
+POST {{LockFlow.OrderService_HostAddress}}/PlaceOrder/PlaceOrder
+Content-Type: application/json
+
+{
+  "ProductId": 1,
+  "Quantity": 1
+}
+###
+
+POST {{LockFlow.OrderService_HostAddress}}/PlaceOrderWithHeartBeat/PlaceOrder
+Content-Type: application/json
+
+{
+  "ProductId": 1,
+  "Quantity": 1
+}
