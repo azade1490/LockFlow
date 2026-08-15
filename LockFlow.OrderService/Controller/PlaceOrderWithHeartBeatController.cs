@@ -66,16 +66,12 @@ public class PlaceOrderWithHeartBeatController : ControllerBase
             var stockKey = $"product:stock:{orderDto.ProductId}";
 
             // مقدار stock باید از سرویس Inventory خوانده شود ولی اینجا برای تست مقدار stock را در Redis ذخیره میکنیم
-            if (!await db.KeyExistsAsync(stockKey))
-            {
-                var expiry = TimeSpan.FromSeconds(60);
-                
-                bool success =await db.StringSetAsync(
-                    stockKey,
-                    100,
-                    expiry
-                    );
-            }
+            await db.StringSetAsync(
+                            stockKey,
+                            100,
+                            TimeSpan.FromSeconds(120),
+                            When.NotExists
+                            );
 
             //// خواندن موجودی از Redis  
             var stockValue = await db.StringGetAsync(stockKey);
@@ -113,7 +109,9 @@ public class PlaceOrderWithHeartBeatController : ControllerBase
             // ذخیره موجودی در Redis برای استفاده در ورکر OrderQueueWorker
             await db.StringSetAsync(
                 stockKey,
-                currentStock);
+                currentStock,
+                TimeSpan.FromSeconds(120)
+                );
 
             Address address = new Address("Iran", "Tehran", "Tehran", "street", "123456789");
             var order = new LockFlow.OrderService.Domain.Order.AggregateRoot.Order(address);

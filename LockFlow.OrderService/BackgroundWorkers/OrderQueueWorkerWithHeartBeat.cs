@@ -80,7 +80,7 @@ public sealed class OrderQueueWorkerWithHeartBeat : BackgroundService
             // -------------------------------  
             // از اینجا به بعد قفل با موفقیت گرفته شده است.  
             // -------------------------------  
-  
+
             var stockKey = $"product:stock:{orderDto.ProductId}";
 
             //// خواندن موجودی از Redis  
@@ -113,7 +113,8 @@ public sealed class OrderQueueWorkerWithHeartBeat : BackgroundService
             // ذخیره موجودی در Redis برای استفاده در ورکر OrderQueueWorker
             await db.StringSetAsync(
                 stockKey,
-                currentStock
+                currentStock,
+                TimeSpan.FromSeconds(120)
                 );
 
             using var scope = _scopeFactory.CreateScope();

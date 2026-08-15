@@ -23,7 +23,7 @@ var tasks = Enumerable.Range(1, requestCount)
 
         Console.WriteLine($"{i}: {response.StatusCode}");
 
-        var response2 = await client.PostAsJsonAsync("/PlaceOrder/PlaceOrder", new
+        var response2 = await client.PostAsJsonAsync("/PlaceOrderWithHeartBeat/PlaceOrder", new
         {
             productId = 2,
             quantity = 1

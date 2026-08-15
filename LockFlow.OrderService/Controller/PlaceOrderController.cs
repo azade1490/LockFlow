@@ -86,16 +86,12 @@ public class PlaceOrderController : ControllerBase
             var stockKey = $"product:stock:{orderDto.ProductId}";
 
             // مقدار stock باید از سرویس Inventory خوانده شود ولی اینجا برای تست مقدار stock را در Redis ذخیره میکنیم
-            if (!await db.KeyExistsAsync(stockKey))
-            {
-                var expiry = TimeSpan.FromSeconds(60);
-                
-                bool success =await db.StringSetAsync(
-                    stockKey,
-                    100,
-                    expiry
-                    );
-            }
+            await db.StringSetAsync(
+                stockKey,
+                100,
+                TimeSpan.FromSeconds(120),
+                When.NotExists
+                );
 
             //// خواندن موجودی از Redis  
             var stockValue = await db.StringGetAsync(stockKey);
@@ -108,7 +104,7 @@ public class PlaceOrderController : ControllerBase
 
                 return BadRequest(new ProblemDetails
                 {
-                    Detail=$"Stock not found for product {orderDto.ProductId}"                    
+                    Detail = $"Stock not found for product {orderDto.ProductId}"
                 });
             }
 
@@ -123,7 +119,7 @@ public class PlaceOrderController : ControllerBase
 
                 return BadRequest(new ProblemDetails
                 {
-                    Detail = $"Insufficient stock for ProductId: {orderDto.ProductId}"                    
+                    Detail = $"Insufficient stock for ProductId: {orderDto.ProductId}"
                 });
             }
 
@@ -133,8 +129,10 @@ public class PlaceOrderController : ControllerBase
             // ذخیره موجودی در Redis برای استفاده در ورکر OrderQueueWorker
             await db.StringSetAsync(
                 stockKey,
-                currentStock);
-                
+                currentStock,
+                TimeSpan.FromSeconds(120)
+                );
+
             Address address = new Address("Iran", "Tehran", "Tehran", "street", "123456789");
             var order = new LockFlow.OrderService.Domain.Order.AggregateRoot.Order(address);
             Money money = new Money(1000000000, "IRR");

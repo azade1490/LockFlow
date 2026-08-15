@@ -99,7 +99,7 @@ public sealed class OrderQueueWorker : BackgroundService
                     }
                 }
             });
-          cts.Cancel();  
+          cts.Cancel();
             //پایان Heartbeat
 
             var stockKey = $"product:stock:{orderDto.ProductId}";
@@ -134,7 +134,8 @@ public sealed class OrderQueueWorker : BackgroundService
             // ذخیره موجودی در Redis برای استفاده در ورکر OrderQueueWorker
             await db.StringSetAsync(
                 stockKey,
-                currentStock
+                currentStock,
+                TimeSpan.FromSeconds(120)
                 );
 
             using var scope = _scopeFactory.CreateScope();
