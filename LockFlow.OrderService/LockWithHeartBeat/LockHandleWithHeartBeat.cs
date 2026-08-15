@@ -58,6 +58,8 @@ public sealed class LockHandleWithHeartBeat : IAsyncDisposable
             }
             catch (OperationCanceledException)
             {
+                //وقتی cts.Cancel() اجرا میشود WaitForNextTickAsync(cts.Token) استثنا پرتاب میکند.
+        // طبیعی است و نیازی به لاگ ندارد.
             }
         });
     }
