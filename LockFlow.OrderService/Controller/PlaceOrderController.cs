@@ -173,8 +173,7 @@ heartbeatTask = Task.Run(async () =>
         {
             // این بخش در هر صورت اجرا می‌شود
             //(چه درخواست موفق باشد چه خطا رخ دهد)
-            finally
-{
+
     cts.Cancel();
 
     if (heartbeatTask != null)
@@ -197,7 +196,6 @@ heartbeatTask = Task.Run(async () =>
     {
         _logger.LogError(ex, "Error releasing Redis lock.");
     }
-}
         }
     }
 }
