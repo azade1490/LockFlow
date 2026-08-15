@@ -173,19 +173,31 @@ heartbeatTask = Task.Run(async () =>
         {
             // این بخش در هر صورت اجرا می‌شود
             //(چه درخواست موفق باشد چه خطا رخ دهد)
-            try
-            {
-            cts.Cancel();
-   if (heartbeatTask != null)
-        await heartbeatTask;
-                await _distributedLockService.ReleaseAsync(lockHandle);
-            }
-            catch (Exception ex)
-            {
-                // اگر آزاد کردن قفل با خطا مواجه شود،  
-                // فقط لاگ ثبت می‌شود.  
-                _logger.LogError(ex, "Error releasing Redis lock.");
-            }
+            finally
+{
+    cts.Cancel();
+
+    if (heartbeatTask != null)
+    {
+        try
+        {
+            await heartbeatTask;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Heartbeat task failed.");
+        }
+    }
+
+    try
+    {
+        await _distributedLockService.ReleaseAsync(lockHandle);
+    }
+    catch (Exception ex)
+    {
+        _logger.LogError(ex, "Error releasing Redis lock.");
+    }
+}
         }
     }
 }
