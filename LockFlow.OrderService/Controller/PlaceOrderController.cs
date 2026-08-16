@@ -178,6 +178,7 @@ public class PlaceOrderController : ControllerBase
             {
                 try
                 {
+                    //متوقف کردن heartbeatTask
                     await heartbeatTask;
                 }
                 catch (Exception ex)

@@ -1,4 +1,6 @@
-﻿namespace LockFlow.OrderService.LockWithHeartBeat;
+﻿using LockFlow.OrderService.Lock;
+
+namespace LockFlow.OrderService.LockWithHeartBeat;
 
 //بهترین طراحی این است که LockHandle خودش مسئول Heartbeat باشد. در این صورت Controller و Worker اصلاً از وجود Timer خبر ندارند.
 public sealed class LockHandleWithHeartBeat : IAsyncDisposable
@@ -7,7 +9,7 @@ public sealed class LockHandleWithHeartBeat : IAsyncDisposable
     private readonly CancellationTokenSource _cts;
     private readonly IDistributedLockServiceWithHeartBeat _service;
 
-    internal LockHandleWithHeartBeat(IDistributedLockServiceWithHeartBeat service,string key,string value,TimeSpan expiry)
+    internal LockHandleWithHeartBeat(IDistributedLockServiceWithHeartBeat service, string key, string value, TimeSpan expiry)
     {
         _service = service;
 
@@ -28,18 +30,39 @@ public sealed class LockHandleWithHeartBeat : IAsyncDisposable
     public string Value { get; }
 
     public TimeSpan Expiry { get; }
+    private Task? heartbeatTask = null;
 
     public async ValueTask DisposeAsync()
     {
         _cts.Cancel();
 
+        if (heartbeatTask != null)
+        {
+            try
+            {
+                //متوقف کردن heartbeatTask
+                await heartbeatTask;
+            }
+            catch (Exception ex)
+            {
+                //_logger.LogError(ex, "Heartbeat task failed.");
+            }
+        }
+
         _timer.Dispose();
         
-        await _service.ReleaseAsync(this);
+        try
+        {
+            await _service.ReleaseAsync(this);
+        }
+        catch (Exception ex)
+        {
+            //_logger.LogError(ex, "Error releasing Redis lock.");
+        }
     }
     private void StartHeartbeat()
     {
-        _ = Task.Run(async () =>
+        heartbeatTask = Task.Run(async () =>
         {
             try
             {
@@ -59,9 +82,8 @@ public sealed class LockHandleWithHeartBeat : IAsyncDisposable
             catch (OperationCanceledException)
             {
                 //وقتی cts.Cancel() اجرا میشود WaitForNextTickAsync(cts.Token) استثنا پرتاب میکند.
-        // طبیعی است و نیازی به لاگ ندارد.
+                // طبیعی است و نیازی به لاگ ندارد.
             }
         });
     }
-
 }
