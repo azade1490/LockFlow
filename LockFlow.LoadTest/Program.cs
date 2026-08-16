@@ -17,18 +17,18 @@ var tasks = Enumerable.Range(1, requestCount)
 
         var response = await client.PostAsJsonAsync("/PlaceOrder/PlaceOrder", new
         {
-            productId = 1,
-            quantity = 1
+            productId = 33,
+            quantity = 2
         });
 
-        Console.WriteLine($"{i}: {response.StatusCode}");
+        Console.WriteLine($"PlaceOrder: {i}: {response.StatusCode}");
 
         var response2 = await client.PostAsJsonAsync("/PlaceOrderWithHeartBeat/PlaceOrder", new
         {
-            productId = 2,
-            quantity = 1
+            productId = 44,
+            quantity = 2
         });
-        Console.WriteLine($"{i}: {response2.StatusCode}");
+        Console.WriteLine($"PlaceOrderWithHeartBeat: {i}: {response2.StatusCode}");
 
     });
 

@@ -54,7 +54,7 @@ public sealed class DistributedLockServiceWithHeartBeat
         // قفل تمدید می‌شود.  
         if (currentValue == handle.Value)
         {
-            return await db.KeyExpireAsync(handle.Key, TimeSpan.FromSeconds(10));
+            return await db.KeyExpireAsync(handle.Key, handle.Expiry);
         }
         return false;
     }

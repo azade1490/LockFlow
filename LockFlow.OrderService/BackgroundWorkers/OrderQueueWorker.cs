@@ -75,33 +75,40 @@ public sealed class OrderQueueWorker : BackgroundService
             return;
         }
 
+        using var cts = new CancellationTokenSource();
+        Task? heartbeatTask = null;
+
         try
         {
             // -------------------------------  
             // از اینجا به بعد قفل با موفقیت گرفته شده است.  
             // -------------------------------  
 
-            // 👇 اینجا Heartbeat را شروع می‌کنید
-            using var cts = new CancellationTokenSource();
-
-            _ = Task.Run(async () =>
+            // 👇 شروع Heartbeat
+            heartbeatTask = Task.Run(async () =>
             {
                 using var timer = new PeriodicTimer(TimeSpan.FromSeconds(5));
 
-                while (await timer.WaitForNextTickAsync(cts.Token))
+                try
                 {
-                    bool renewed = await _distributedLockService.RenewAsync(lockHandle);
-
-                    if (!renewed)
+                    while (await timer.WaitForNextTickAsync(cts.Token))
                     {
-                        _logger.LogWarning("Lock lost.");
-                        break;
+                        bool renewed = await _distributedLockService.RenewAsync(lockHandle);
+
+                        if (!renewed)
+                        {
+                            _logger.LogWarning("Lock lost.");
+                            break;
+                        }
                     }
                 }
+                catch (OperationCanceledException)
+                {
+                    //وقتی cts.Cancel() اجرا میشود WaitForNextTickAsync(cts.Token) استثنا پرتاب میکند.
+                    // طبیعی است و نیازی به لاگ ندارد.
+                }
             });
-          cts.Cancel();
-            //پایان Heartbeat
-
+            // پایان Heartbeat
             var stockKey = $"product:stock:{orderDto.ProductId}";
 
             //// خواندن موجودی از Redis  
@@ -175,14 +182,28 @@ public sealed class OrderQueueWorker : BackgroundService
         {
             // این بخش در هر صورت اجرا می‌شود
             //(چه درخواست موفق باشد چه خطا رخ دهد)
+
+            cts.Cancel();
+
+            if (heartbeatTask != null)
+            {
+                try
+                {
+                    //متوقف کردن heartbeatTask
+                    await heartbeatTask;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Heartbeat task failed.");
+                }
+            }
+
             try
             {
                 await _distributedLockService.ReleaseAsync(lockHandle);
             }
             catch (Exception ex)
             {
-                // اگر آزاد کردن قفل با خطا مواجه شود،  
-                // فقط لاگ ثبت می‌شود.  
                 _logger.LogError(ex, "Error releasing Redis lock.");
             }
         }
