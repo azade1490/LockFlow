@@ -8,10 +8,14 @@ public sealed class LockHandleWithHeartBeat : IAsyncDisposable
     private readonly PeriodicTimer _timer;
     private readonly CancellationTokenSource _cts;
     private readonly IDistributedLockServiceWithHeartBeat _service;
+    private readonly ILogger<Domain.Order.AggregateRoot.Order> _logger;
+    private readonly Task _heartbeatTask;
 
-    internal LockHandleWithHeartBeat(IDistributedLockServiceWithHeartBeat service, string key, string value, TimeSpan expiry)
+    internal LockHandleWithHeartBeat(IDistributedLockServiceWithHeartBeat service, ILogger<Domain.Order.AggregateRoot.Order> logger, string key, string value, TimeSpan expiry)
     {
         _service = service;
+        _logger = logger;
+        _heartbeatTask = StartHeartbeat();
 
         Key = key;
         Value = value;
@@ -30,22 +34,21 @@ public sealed class LockHandleWithHeartBeat : IAsyncDisposable
     public string Value { get; }
 
     public TimeSpan Expiry { get; }
-    private Task? heartbeatTask = null;
 
     public async ValueTask DisposeAsync()
     {
         _cts.Cancel();
 
-        if (heartbeatTask != null)
+        if (_heartbeatTask != null)
         {
             try
             {
                 //متوقف کردن heartbeatTask
-                await heartbeatTask;
+                await _heartbeatTask;
             }
             catch (Exception ex)
             {
-                //_logger.LogError(ex, "Heartbeat task failed.");
+                _logger.LogError(ex, "Heartbeat task failed.");
             }
         }
 
@@ -57,12 +60,12 @@ public sealed class LockHandleWithHeartBeat : IAsyncDisposable
         }
         catch (Exception ex)
         {
-            //_logger.LogError(ex, "Error releasing Redis lock.");
+            _logger.LogError(ex, "Error releasing Redis lock.");
         }
     }
-    private void StartHeartbeat()
+    private Task StartHeartbeat()
     {
-        heartbeatTask = Task.Run(async () =>
+        return Task.Run(async () =>
         {
             try
             {
@@ -74,7 +77,6 @@ public sealed class LockHandleWithHeartBeat : IAsyncDisposable
                     if (!ok)
                     {
                         //Lock از دست رفت
-                        _cts.Cancel();
                         break;
                     }
                 }
