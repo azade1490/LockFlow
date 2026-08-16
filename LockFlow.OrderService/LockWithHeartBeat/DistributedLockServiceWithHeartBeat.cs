@@ -5,11 +5,13 @@ public sealed class DistributedLockServiceWithHeartBeat
     : IDistributedLockServiceWithHeartBeat
 {
     private readonly IConnectionMultiplexer _redis;
+    private readonly ILogger<Domain.Order.AggregateRoot.Order> _logger;
 
     public DistributedLockServiceWithHeartBeat(
-        IConnectionMultiplexer redis)
+        IConnectionMultiplexer redis, ILogger<Domain.Order.AggregateRoot.Order> logger)
     {
         _redis = redis;
+        _logger = logger;
     }
 
     public async Task<LockHandleWithHeartBeat?> AcquireAsync(string key)
@@ -56,6 +58,10 @@ public sealed class DistributedLockServiceWithHeartBeat
         {
             return await db.KeyExpireAsync(handle.Key, handle.Expiry);
         }
+
+        //Lock از دست رفت
+        _logger.LogWarning("Lock lost.");
+
         return false;
     }
 
@@ -71,6 +77,9 @@ public sealed class DistributedLockServiceWithHeartBeat
         {
             return await db.KeyDeleteAsync(handle.Key);
         }
+
+        _logger.LogWarning("Lock release failed.");
+
         return false;
     }
 }

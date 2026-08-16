@@ -55,6 +55,7 @@ public sealed class LockHandleWithHeartBeat : IAsyncDisposable
                     if (!ok)
                     {
                         //Lock از دست رفت
+                        //در DistributedLockServiceWithHeartBeat لاگ اش را ثبت میکنیم
                         break;
                     }
                 }

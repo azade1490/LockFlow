@@ -193,7 +193,7 @@ public class PlaceOrderController : ControllerBase
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error releasing Redis lock.");
+                _logger.LogError(ex, "Lock release failed.");
             }
         }
     }
