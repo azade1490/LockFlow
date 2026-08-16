@@ -52,11 +52,11 @@ public class PlaceOrderController : ControllerBase
 
             return Accepted(new
             {
-                Message = "Your order has been queued and will be processed shortly." 
+                Message = "Your order has been queued and will be processed shortly."
             });
         }
-using var cts = new CancellationTokenSource();
-Task? heartbeatTask = null;
+        using var cts = new CancellationTokenSource();
+        Task? heartbeatTask = null;
 
         try
         {
@@ -64,31 +64,31 @@ Task? heartbeatTask = null;
             // از اینجا به بعد قفل با موفقیت گرفته شده است.  
             // -------------------------------  
 
-// 👇 شروع Heartbeat
-heartbeatTask = Task.Run(async () =>
-{
-    using var timer = new PeriodicTimer(TimeSpan.FromSeconds(5));
-
-    try
-    {
-        while (await timer.WaitForNextTickAsync(cts.Token))
-        {
-            bool renewed = await _distributedLockService.RenewAsync(lockHandle);
-
-            if (!renewed)
+            // 👇 شروع Heartbeat
+            heartbeatTask = Task.Run(async () =>
             {
-                _logger.LogWarning("Lock lost.");
-                break;
-            }
-        }
-    }
-    catch (OperationCanceledException)
-    {
-    //وقتی cts.Cancel() اجرا میشود WaitForNextTickAsync(cts.Token) استثنا پرتاب میکند.
-        // طبیعی است و نیازی به لاگ ندارد.
-    }
-});
-// پایان Heartbeat
+                using var timer = new PeriodicTimer(TimeSpan.FromSeconds(5));
+
+                try
+                {
+                    while (await timer.WaitForNextTickAsync(cts.Token))
+                    {
+                        bool renewed = await _distributedLockService.RenewAsync(lockHandle);
+
+                        if (!renewed)
+                        {
+                            _logger.LogWarning("Lock lost.");
+                            break;
+                        }
+                    }
+                }
+                catch (OperationCanceledException)
+                {
+                    //وقتی cts.Cancel() اجرا میشود WaitForNextTickAsync(cts.Token) استثنا پرتاب میکند.
+                    // طبیعی است و نیازی به لاگ ندارد.
+                }
+            });
+            // پایان Heartbeat
 
             var stockKey = $"product:stock:{orderDto.ProductId}";
 
@@ -155,11 +155,11 @@ heartbeatTask = Task.Run(async () =>
                 .PublishAsync(
                     "order-placed",
                     JsonSerializer.Serialize(orderDto));
-            
+
             return Ok(new
             {
                 order.Id,
-                Message = ("order { OrderId} processed.",order.Id)
+                Message = ("order { OrderId} processed.", order.Id)
             });
         }
         catch (Exception ex)
@@ -172,28 +172,28 @@ heartbeatTask = Task.Run(async () =>
             // این بخش در هر صورت اجرا می‌شود
             //(چه درخواست موفق باشد چه خطا رخ دهد)
 
-    cts.Cancel();
+            cts.Cancel();
 
-    if (heartbeatTask != null)
-    {
-        try
-        {
-            await heartbeatTask;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Heartbeat task failed.");
-        }
-    }
+            if (heartbeatTask != null)
+            {
+                try
+                {
+                    await heartbeatTask;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Heartbeat task failed.");
+                }
+            }
 
-    try
-    {
-        await _distributedLockService.ReleaseAsync(lockHandle);
-    }
-    catch (Exception ex)
-    {
-        _logger.LogError(ex, "Error releasing Redis lock.");
-    }
+            try
+            {
+                await _distributedLockService.ReleaseAsync(lockHandle);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error releasing Redis lock.");
+            }
         }
     }
 }
