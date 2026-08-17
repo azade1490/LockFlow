@@ -14,14 +14,14 @@ public sealed class OrderQueueWorkerWithHeartBeat : BackgroundService
 {
     private readonly IConnectionMultiplexer _redis;
     private readonly IServiceScopeFactory _scopeFactory;
-    private readonly IDistributedLockServiceWithHeartBeat _distributedLockServiceWithHeartBeat;
+    private readonly ILockServiceWithHeartBeat _LockServiceWithHeartBeat;
     private readonly ILogger<OrderQueueWorker> _logger;
 
-    public OrderQueueWorkerWithHeartBeat(IConnectionMultiplexer redis,IServiceScopeFactory scopeFactory, IDistributedLockServiceWithHeartBeat distributedLockServiceWithHeartBeat, ILogger<OrderQueueWorker> logger)
+    public OrderQueueWorkerWithHeartBeat(IConnectionMultiplexer redis,IServiceScopeFactory scopeFactory, ILockServiceWithHeartBeat LockServiceWithHeartBeat, ILogger<OrderQueueWorker> logger)
     {
         _redis = redis;
         _scopeFactory = scopeFactory;
-        _distributedLockServiceWithHeartBeat = distributedLockServiceWithHeartBeat;
+        _LockServiceWithHeartBeat = LockServiceWithHeartBeat;
         _logger = logger;
     }
 
@@ -60,7 +60,7 @@ public sealed class OrderQueueWorkerWithHeartBeat : BackgroundService
         var lockKey = $"lock:product:{orderDto.ProductId}";
         
         // در پایان بلاک قفل به صورت اتوماتیک آزاد می‌شود.
-        await using var lockHandle = await _distributedLockServiceWithHeartBeat.AcquireAsync(lockKey);
+        await using var lockHandle = await _LockServiceWithHeartBeat.AcquireAsync(lockKey);
 
         // اگر قفل در اختیار درخواست دیگری باشد
         //اگر از صف RabbitMQ استفاده کنیم نیازی به برگرداندن سفارش به صف نیست چون از صف حذف نشده است

@@ -1,5 +1,5 @@
 ﻿namespace LockFlow.OrderService.LockWithHeartBeat;
-public interface IDistributedLockServiceWithHeartBeat
+public interface ILockServiceWithHeartBeat
 {
     Task<LockHandleWithHeartBeat?> AcquireAsync(string key);
 

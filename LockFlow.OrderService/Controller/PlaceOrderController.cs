@@ -18,13 +18,13 @@ public class PlaceOrderController : ControllerBase
     private readonly IConnectionMultiplexer _redis;
     private readonly ILogger<Domain.Order.AggregateRoot.Order> _logger;
     private readonly AppDbContext _context;
-    private readonly IDistributedLockService _distributedLockService;
-    public PlaceOrderController(ILogger<Domain.Order.AggregateRoot.Order> logger, IConnectionMultiplexer connectionMultiplexer, AppDbContext appDbContext, IDistributedLockService distributedLockService)
+    private readonly ILockService _LockService;
+    public PlaceOrderController(ILogger<Domain.Order.AggregateRoot.Order> logger, IConnectionMultiplexer connectionMultiplexer, AppDbContext appDbContext, ILockService LockService)
     {
         _logger = logger;
         _redis = connectionMultiplexer;
         _context = appDbContext;
-        _distributedLockService = distributedLockService;
+        _LockService = LockService;
     }
 
     [HttpPost]
@@ -37,7 +37,7 @@ public class PlaceOrderController : ControllerBase
         // مثال: lock:product:1001
         var lockKey = $"lock:product:{orderDto.ProductId}";
 
-        var lockHandle = await _distributedLockService.AcquireAsync(lockKey);
+        var lockHandle = await _LockService.AcquireAsync(lockKey);
 
         // اگر قفل در اختیار درخواست دیگری باشد  
         if (lockHandle == null)
@@ -73,7 +73,7 @@ public class PlaceOrderController : ControllerBase
                 {
                     while (await timer.WaitForNextTickAsync(cts.Token))
                     {
-                        bool renewed = await _distributedLockService.RenewAsync(lockHandle);
+                        bool renewed = await _LockService.RenewAsync(lockHandle);
 
                         if (!renewed)
                         {
@@ -185,7 +185,7 @@ public class PlaceOrderController : ControllerBase
                     _logger.LogError(ex, "Heartbeat task failed.");
                 }
             }
-                await _distributedLockService.ReleaseAsync(lockHandle);
+                await _LockService.ReleaseAsync(lockHandle);
         }
     }
 }

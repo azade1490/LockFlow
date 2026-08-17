@@ -1,5 +1,5 @@
 ﻿namespace LockFlow.OrderService.Lock;
-public interface IDistributedLockService
+public interface ILockService
 {
     Task<LockHandle?> AcquireAsync(string key);
 

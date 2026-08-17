@@ -14,14 +14,14 @@ public sealed class OrderQueueWorker : BackgroundService
 {
     private readonly IConnectionMultiplexer _redis;
     private readonly IServiceScopeFactory _scopeFactory;
-    private readonly IDistributedLockService _distributedLockService;
+    private readonly ILockService _LockService;
     private readonly ILogger<OrderQueueWorker> _logger;
 
-    public OrderQueueWorker(IConnectionMultiplexer redis,IServiceScopeFactory scopeFactory, IDistributedLockService distributedLockService, ILogger<OrderQueueWorker> logger)
+    public OrderQueueWorker(IConnectionMultiplexer redis,IServiceScopeFactory scopeFactory, ILockService LockService, ILogger<OrderQueueWorker> logger)
     {
         _redis = redis;
         _scopeFactory = scopeFactory;
-        _distributedLockService = distributedLockService;
+        _LockService = LockService;
         _logger = logger;
     }
 
@@ -60,7 +60,7 @@ public sealed class OrderQueueWorker : BackgroundService
         // مثال: lock:product:1001
         var lockKey = $"lock:product:{orderDto.ProductId}";
 
-        var lockHandle = await _distributedLockService.AcquireAsync(lockKey);
+        var lockHandle = await _LockService.AcquireAsync(lockKey);
 
         // اگر قفل در اختیار درخواست دیگری باشد
         //اگر از صف RabbitMQ استفاده کنیم نیازی به برگرداندن سفارش به صف نیست چون از صف حذف نشده است
@@ -93,12 +93,10 @@ public sealed class OrderQueueWorker : BackgroundService
                 {
                     while (await timer.WaitForNextTickAsync(cts.Token))
                     {
-                        bool renewed = await _distributedLockService.RenewAsync(lockHandle);
+                        bool renewed = await _LockService.RenewAsync(lockHandle);
 
                         if (!renewed)
-                        {
                             break;
-                        }
                     }
                 }
                 catch (OperationCanceledException)
@@ -196,7 +194,7 @@ public sealed class OrderQueueWorker : BackgroundService
                     _logger.LogError(ex, "Heartbeat task failed.");
                 }
             }
-                await _distributedLockService.ReleaseAsync(lockHandle);
+                await _LockService.ReleaseAsync(lockHandle);
         }
     }
 }

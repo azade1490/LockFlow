@@ -1,13 +1,13 @@
 ﻿using StackExchange.Redis;
 
 namespace LockFlow.OrderService.Lock;
-public sealed class DistributedLockService
-    : IDistributedLockService
+public sealed class LockService
+    : ILockService
 {
     private readonly IConnectionMultiplexer _redis;
     private readonly ILogger<Domain.Order.AggregateRoot.Order> _logger;
 
-    public DistributedLockService(
+    public LockService(
         IConnectionMultiplexer redis, ILogger<Domain.Order.AggregateRoot.Order> logger)
     {
         _redis = redis;

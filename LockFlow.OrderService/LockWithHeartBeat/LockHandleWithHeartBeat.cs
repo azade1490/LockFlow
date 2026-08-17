@@ -5,10 +5,10 @@ public sealed class LockHandleWithHeartBeat : IAsyncDisposable
 {
     private readonly PeriodicTimer _timer;
     private readonly CancellationTokenSource _cts;
-    private readonly IDistributedLockServiceWithHeartBeat _service;
+    private readonly ILockServiceWithHeartBeat _service;
     private readonly Task _heartbeatTask;
 
-    internal LockHandleWithHeartBeat(IDistributedLockServiceWithHeartBeat service, string key, string value, TimeSpan expiry)
+    internal LockHandleWithHeartBeat(ILockServiceWithHeartBeat service, string key, string value, TimeSpan expiry)
     {
         _service = service;
 

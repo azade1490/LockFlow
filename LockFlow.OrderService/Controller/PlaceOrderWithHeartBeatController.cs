@@ -18,13 +18,13 @@ public class PlaceOrderWithHeartBeatController : ControllerBase
     private readonly IConnectionMultiplexer _redis;
     private readonly ILogger<Domain.Order.AggregateRoot.Order> _logger;
     private readonly AppDbContext _context;
-    private readonly IDistributedLockServiceWithHeartBeat _distributedLockServiceWithHeartBeat;
-    public PlaceOrderWithHeartBeatController(ILogger<Domain.Order.AggregateRoot.Order> logger, IConnectionMultiplexer connectionMultiplexer, AppDbContext appDbContext, IDistributedLockServiceWithHeartBeat distributedLockServiceWithHeartBeat)
+    private readonly ILockServiceWithHeartBeat _LockServiceWithHeartBeat;
+    public PlaceOrderWithHeartBeatController(ILogger<Domain.Order.AggregateRoot.Order> logger, IConnectionMultiplexer connectionMultiplexer, AppDbContext appDbContext, ILockServiceWithHeartBeat LockServiceWithHeartBeat)
     {
         _logger = logger;
         _redis = connectionMultiplexer;
         _context = appDbContext;
-        _distributedLockServiceWithHeartBeat = distributedLockServiceWithHeartBeat;
+        _LockServiceWithHeartBeat = LockServiceWithHeartBeat;
     }
 
     [HttpPost]
@@ -38,7 +38,7 @@ public class PlaceOrderWithHeartBeatController : ControllerBase
         var lockKey = $"lock:product:{orderDto.ProductId}";
         
         // در پایان بلاک قفل به صورت اتوماتیک آزاد می‌شود.
-        await using var lockHandle = await _distributedLockServiceWithHeartBeat.AcquireAsync(lockKey);
+        await using var lockHandle = await _LockServiceWithHeartBeat.AcquireAsync(lockKey);
 
         // اگر قفل در اختیار درخواست دیگری باشد  
         if (lockHandle == null)

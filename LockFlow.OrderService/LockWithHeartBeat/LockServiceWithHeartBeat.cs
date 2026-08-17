@@ -1,13 +1,13 @@
 ﻿using StackExchange.Redis;
 
 namespace LockFlow.OrderService.LockWithHeartBeat;
-public sealed class DistributedLockServiceWithHeartBeat
-    : IDistributedLockServiceWithHeartBeat
+public sealed class LockServiceWithHeartBeat
+    : ILockServiceWithHeartBeat
 {
     private readonly IConnectionMultiplexer _redis;
     private readonly ILogger<Domain.Order.AggregateRoot.Order> _logger;
 
-    public DistributedLockServiceWithHeartBeat(
+    public LockServiceWithHeartBeat(
         IConnectionMultiplexer redis, ILogger<Domain.Order.AggregateRoot.Order> logger)
     {
         _redis = redis;
