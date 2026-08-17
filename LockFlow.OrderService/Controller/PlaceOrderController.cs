@@ -18,13 +18,13 @@ public class PlaceOrderController : ControllerBase
     private readonly IConnectionMultiplexer _redis;
     private readonly ILogger<Domain.Order.AggregateRoot.Order> _logger;
     private readonly AppDbContext _context;
-    private readonly ILockService _LockService;
-    public PlaceOrderController(ILogger<Domain.Order.AggregateRoot.Order> logger, IConnectionMultiplexer connectionMultiplexer, AppDbContext appDbContext, ILockService LockService)
+    private readonly ILockService _lockService;
+    public PlaceOrderController(ILogger<Domain.Order.AggregateRoot.Order> logger, IConnectionMultiplexer connectionMultiplexer, AppDbContext appDbContext, ILockService lockService)
     {
         _logger = logger;
         _redis = connectionMultiplexer;
         _context = appDbContext;
-        _LockService = LockService;
+        _lockService = lockService;
     }
 
     [HttpPost]
@@ -37,7 +37,7 @@ public class PlaceOrderController : ControllerBase
         // مثال: lock:product:1001
         var lockKey = $"lock:product:{orderDto.ProductId}";
 
-        var lockHandle = await _LockService.AcquireAsync(lockKey);
+        var lockHandle = await _lockService.AcquireAsync(lockKey);
 
         // اگر قفل در اختیار درخواست دیگری باشد  
         if (lockHandle == null)
@@ -73,7 +73,7 @@ public class PlaceOrderController : ControllerBase
                 {
                     while (await timer.WaitForNextTickAsync(cts.Token))
                     {
-                        bool renewed = await _LockService.RenewAsync(lockHandle);
+                        bool renewed = await _lockService.RenewAsync(lockHandle);
 
                         if (!renewed)
                         {
@@ -185,7 +185,7 @@ public class PlaceOrderController : ControllerBase
                     _logger.LogError(ex, "Heartbeat task failed.");
                 }
             }
-                await _LockService.ReleaseAsync(lockHandle);
+                await _lockService.ReleaseAsync(lockHandle);
         }
     }
 }

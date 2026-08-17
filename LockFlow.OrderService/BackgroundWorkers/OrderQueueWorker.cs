@@ -14,14 +14,14 @@ public sealed class OrderQueueWorker : BackgroundService
 {
     private readonly IConnectionMultiplexer _redis;
     private readonly IServiceScopeFactory _scopeFactory;
-    private readonly ILockService _LockService;
+    private readonly ILockService _lockService;
     private readonly ILogger<OrderQueueWorker> _logger;
 
-    public OrderQueueWorker(IConnectionMultiplexer redis,IServiceScopeFactory scopeFactory, ILockService LockService, ILogger<OrderQueueWorker> logger)
+    public OrderQueueWorker(IConnectionMultiplexer redis,IServiceScopeFactory scopeFactory, ILockService lockService, ILogger<OrderQueueWorker> logger)
     {
         _redis = redis;
         _scopeFactory = scopeFactory;
-        _LockService = LockService;
+        _lockService = lockService;
         _logger = logger;
     }
 
@@ -60,7 +60,7 @@ public sealed class OrderQueueWorker : BackgroundService
         // مثال: lock:product:1001
         var lockKey = $"lock:product:{orderDto.ProductId}";
 
-        var lockHandle = await _LockService.AcquireAsync(lockKey);
+        var lockHandle = await _lockService.AcquireAsync(lockKey);
 
         // اگر قفل در اختیار درخواست دیگری باشد
         //اگر از صف RabbitMQ استفاده کنیم نیازی به برگرداندن سفارش به صف نیست چون از صف حذف نشده است
@@ -93,7 +93,7 @@ public sealed class OrderQueueWorker : BackgroundService
                 {
                     while (await timer.WaitForNextTickAsync(cts.Token))
                     {
-                        bool renewed = await _LockService.RenewAsync(lockHandle);
+                        bool renewed = await _lockService.RenewAsync(lockHandle);
 
                         if (!renewed)
                             break;
@@ -194,7 +194,7 @@ public sealed class OrderQueueWorker : BackgroundService
                     _logger.LogError(ex, "Heartbeat task failed.");
                 }
             }
-                await _LockService.ReleaseAsync(lockHandle);
+                await _lockService.ReleaseAsync(lockHandle);
         }
     }
 }
