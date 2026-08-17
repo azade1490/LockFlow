@@ -5,11 +5,14 @@ public sealed class DistributedLockService
     : IDistributedLockService
 {
     private readonly IConnectionMultiplexer _redis;
+    private readonly ILogger<Domain.Order.AggregateRoot.Order> _logger;
 
     public DistributedLockService(
-        IConnectionMultiplexer redis)
+        IConnectionMultiplexer redis, ILogger<Domain.Order.AggregateRoot.Order> logger)
     {
         _redis = redis;
+        _logger = logger;
+
     }
 
     public async Task<LockHandle?> AcquireAsync(string key)
@@ -56,6 +59,10 @@ public sealed class DistributedLockService
         {
             return await db.KeyExpireAsync(handle.Key, handle.Expiry);
         }
+        //بهتر است StringGetAsync و KeyExpireAsync به صورت اتمیک انجام شود تا از Race Condition جلوگیری شود
+
+        _logger.LogWarning("Lock lost.");
+
         return false;
     }
 
@@ -71,6 +78,10 @@ public sealed class DistributedLockService
         {
             return await db.KeyDeleteAsync(handle.Key);
         }
+        //بهتر است StringGetAsync و KeyDeleteAsync به صورت اتمیک انجام شود تا از Race Condition جلوگیری شود
+
+        _logger.LogWarning("Lock release failed.");
+
         return false;
     }
 }

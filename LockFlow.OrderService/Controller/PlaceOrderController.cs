@@ -77,7 +77,6 @@ public class PlaceOrderController : ControllerBase
 
                         if (!renewed)
                         {
-                            _logger.LogWarning("Lock lost.");
                             break;
                         }
                     }
@@ -186,15 +185,7 @@ public class PlaceOrderController : ControllerBase
                     _logger.LogError(ex, "Heartbeat task failed.");
                 }
             }
-
-            try
-            {
                 await _distributedLockService.ReleaseAsync(lockHandle);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Lock release failed.");
-            }
         }
     }
 }

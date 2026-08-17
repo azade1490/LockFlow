@@ -58,8 +58,8 @@ public sealed class DistributedLockServiceWithHeartBeat
         {
             return await db.KeyExpireAsync(handle.Key, handle.Expiry);
         }
+        //بهتر است StringGetAsync و KeyExpireAsync به صورت اتمیک انجام شود تا از Race Condition جلوگیری شود
 
-        //Lock از دست رفت
         _logger.LogWarning("Lock lost.");
 
         return false;
@@ -77,6 +77,7 @@ public sealed class DistributedLockServiceWithHeartBeat
         {
             return await db.KeyDeleteAsync(handle.Key);
         }
+        //بهتر است StringGetAsync و KeyDeleteAsync به صورت اتمیک انجام شود تا از Race Condition جلوگیری شود
 
         _logger.LogWarning("Lock release failed.");
 

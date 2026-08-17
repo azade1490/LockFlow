@@ -97,7 +97,6 @@ public sealed class OrderQueueWorker : BackgroundService
 
                         if (!renewed)
                         {
-                            _logger.LogWarning("Lock lost.");
                             break;
                         }
                     }
@@ -197,15 +196,7 @@ public sealed class OrderQueueWorker : BackgroundService
                     _logger.LogError(ex, "Heartbeat task failed.");
                 }
             }
-
-            try
-            {
                 await _distributedLockService.ReleaseAsync(lockHandle);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Lock release failed.");
-            }
         }
     }
 }
