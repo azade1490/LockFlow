@@ -59,7 +59,7 @@ public sealed class LockService
         {
             return await db.KeyExpireAsync(handle.Key, handle.Expiry);
         }
-        //بهتر است StringGetAsync و KeyExpireAsync به صورت اتمیک انجام شود تا از Race Condition جلوگیری شود
+        //بهتر است StringGetAsync و KeyExpireAsync  با استفاده از Lua scripting و به صورت اتمیک انجام شود تا از Race Condition جلوگیری شود
 
         _logger.LogWarning("Lock lost.");
 
@@ -78,7 +78,7 @@ public sealed class LockService
         {
             return await db.KeyDeleteAsync(handle.Key);
         }
-        //بهتر است StringGetAsync و KeyDeleteAsync به صورت اتمیک انجام شود تا از Race Condition جلوگیری شود
+        //بهتر است StringGetAsync و KeyExpireAsync  با استفاده از Lua scripting و به صورت اتمیک انجام شود تا از Race Condition جلوگیری شود
 
         _logger.LogWarning("Lock release failed.");
 
