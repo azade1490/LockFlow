@@ -60,6 +60,10 @@ public sealed class OrderQueueWorker : BackgroundService
         // مثال: lock:product:1001
         var lockKey = $"lock:product:{orderDto.ProductId}";
 
+        // گرفتن قفل در ورکر برای این است که درخواست های جدید در کنترلر پردازش نشوند و حتما وارد صف شوند تا
+        // از درخواست های همزمان جلوگیری شود
+        // دو ورکر همزمان نتوانند یک سفارش را پردازش کنند
+        // ترتیت و صف رعایت شود
         var lockHandle = await _lockService.AcquireAsync(lockKey);
 
         // اگر قفل در اختیار درخواست دیگری باشد
@@ -67,8 +71,8 @@ public sealed class OrderQueueWorker : BackgroundService
         if (lockHandle == null)
         {
             // هنوز شخص دیگری در حال پردازش همین محصول است.
-            // دوباره به انتهای صف برگردان.
-            await db.ListRightPushAsync(
+            // دوباره به ابتدای صف برگردان.
+            await db.ListLeftPushAsync(
                 "order-queue",
                 JsonSerializer.Serialize(orderDto));
 

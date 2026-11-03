@@ -58,17 +58,21 @@ public sealed class OrderQueueWorker : BackgroundService
         // ساخت کلید قفل برای این محصول
         // مثال: lock:product:1001
         var lockKey = $"lock:product:{orderDto.ProductId}";
-        
-        // در پایان بلاک قفل به صورت اتوماتیک آزاد می‌شود.
+
+        // گرفتن قفل در ورکر برای این است که درخواست های جدید در کنترلر پردازش نشوند و حتما وارد صف شوند تا
+        // از درخواست های همزمان جلوگیری شود
+        // دو ورکر همزمان نتوانند یک سفارش را پردازش کنند
+        // ترتیت و صف رعایت شود
         await using var lockHandle = await _lockService.AcquireAsync(lockKey);
+        // در پایان بلاک قفل به صورت اتوماتیک آزاد می‌شود.
 
         // اگر قفل در اختیار درخواست دیگری باشد
         //اگر از صف RabbitMQ استفاده کنیم نیازی به برگرداندن سفارش به صف نیست چون از صف حذف نشده است
         if (lockHandle == null)
         {
             // هنوز شخص دیگری در حال پردازش همین محصول است.
-            // دوباره به انتهای صف برگردان.
-            await db.ListRightPushAsync(
+            // دوباره به ابتدای صف برگردان.
+            await db.ListLeftPushAsync(
                 "order-queue",
                 JsonSerializer.Serialize(orderDto));
 
