@@ -23,13 +23,6 @@ var tasks = Enumerable.Range(1, requestCount)
 
         Console.WriteLine($"PlaceOrder: {i}: {response.StatusCode}");
 
-        var response2 = await client.PostAsJsonAsync("/PlaceOrderWithHeartBeat/PlaceOrder", new
-        {
-            productId = 44,
-            quantity = 2
-        });
-        Console.WriteLine($"PlaceOrderWithHeartBeat: {i}: {response2.StatusCode}");
-
     });
 
 start.SetResult(); // همه تسک‌ها را همزمان آزاد کن

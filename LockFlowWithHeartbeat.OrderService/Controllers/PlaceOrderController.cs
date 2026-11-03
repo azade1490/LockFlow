@@ -1,30 +1,30 @@
 using Microsoft.AspNetCore.Mvc;
 
-using LockFlow.OrderService.Domain.Order.ValueObjects;
-using LockFlow.OrderService.DTO;
-using LockFlow.OrderService.LockWithHeartBeat;
-using LockFlow.OrderService.Persistence.Data;
+using LockFlowWithHeartbeat.OrderService.Domain.Order.ValueObjects;
+using LockFlowWithHeartbeat.OrderService.DTO;
+using LockFlowWithHeartbeat.OrderService.Lock;
+using LockFlowWithHeartbeat.OrderService.Persistence.Data;
 
 using StackExchange.Redis;
 
 using System.Text.Json;
 
-namespace LockFlow.OrderService.Controllers;
+namespace LockFlowWithHeartbeat.OrderService.Controllers;
 
 [ApiController]
 [Route("[controller]/[Action]")]
-public class PlaceOrderWithHeartBeatController : ControllerBase
+public class PlaceOrderController : ControllerBase
 {
     private readonly IConnectionMultiplexer _redis;
     private readonly ILogger<Domain.Order.AggregateRoot.Order> _logger;
     private readonly AppDbContext _context;
-    private readonly ILockServiceWithHeartBeat _lockServiceWithHeartBeat;
-    public PlaceOrderWithHeartBeatController(ILogger<Domain.Order.AggregateRoot.Order> logger, IConnectionMultiplexer connectionMultiplexer, AppDbContext appDbContext, ILockServiceWithHeartBeat lockServiceWithHeartBeat)
+    private readonly ILockService _lockService;
+    public PlaceOrderController(ILogger<Domain.Order.AggregateRoot.Order> logger, IConnectionMultiplexer connectionMultiplexer, AppDbContext appDbContext, ILockService lockService)
     {
         _logger = logger;
         _redis = connectionMultiplexer;
         _context = appDbContext;
-        _lockServiceWithHeartBeat = lockServiceWithHeartBeat;
+        _lockService = lockService;
     }
 
     [HttpPost]
@@ -38,7 +38,7 @@ public class PlaceOrderWithHeartBeatController : ControllerBase
         var lockKey = $"lock:product:{orderDto.ProductId}";
         
         // در پایان بلاک قفل به صورت اتوماتیک آزاد می‌شود.
-        await using var lockHandle = await _lockServiceWithHeartBeat.AcquireAsync(lockKey);
+        await using var lockHandle = await _lockService.AcquireAsync(lockKey);
 
         // اگر قفل در اختیار درخواست دیگری باشد  
         if (lockHandle == null)
@@ -114,7 +114,7 @@ public class PlaceOrderWithHeartBeatController : ControllerBase
                 );
 
             Address address = new Address("Iran", "Tehran", "Tehran", "street", "123456789");
-            var order = new LockFlow.OrderService.Domain.Order.AggregateRoot.Order(address);
+            var order = new LockFlowWithHeartbeat.OrderService.Domain.Order.AggregateRoot.Order(address);
             Money money = new Money(1000000000, "IRR");
             order.AddItem(Guid.NewGuid(), "LapTop", money, orderDto.Quantity);
 

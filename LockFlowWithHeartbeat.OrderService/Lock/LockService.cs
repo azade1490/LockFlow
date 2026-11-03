@@ -1,20 +1,20 @@
 ﻿using StackExchange.Redis;
 
-namespace LockFlow.OrderService.LockWithHeartBeat;
-public sealed class LockServiceWithHeartBeat
-    : ILockServiceWithHeartBeat
+namespace LockFlowWithHeartbeat.OrderService.Lock;
+public sealed class LockService
+    : ILockService
 {
     private readonly IConnectionMultiplexer _redis;
     private readonly ILogger<Domain.Order.AggregateRoot.Order> _logger;
 
-    public LockServiceWithHeartBeat(
+    public LockService(
         IConnectionMultiplexer redis, ILogger<Domain.Order.AggregateRoot.Order> logger)
     {
         _redis = redis;
         _logger = logger;
     }
 
-    public async Task<LockHandleWithHeartBeat?> AcquireAsync(string key)
+    public async Task<LockHandle?> AcquireAsync(string key)
     {
         var db = _redis.GetDatabase();
 
@@ -38,7 +38,7 @@ public sealed class LockServiceWithHeartBeat
         if (!success)
             return null;
 
-        return new LockHandleWithHeartBeat(
+        return new LockHandle(
             this,
             key,
             value,
@@ -46,7 +46,7 @@ public sealed class LockServiceWithHeartBeat
         );
     }
 
-    public async Task<bool> RenewAsync(LockHandleWithHeartBeat handle)
+    public async Task<bool> RenewAsync(LockHandle handle)
     {
         var db = _redis.GetDatabase();
 
@@ -65,7 +65,7 @@ public sealed class LockServiceWithHeartBeat
         return false;
     }
 
-    public async Task<bool> ReleaseAsync(LockHandleWithHeartBeat handle)
+    public async Task<bool> ReleaseAsync(LockHandle handle)
     {
         var db = _redis.GetDatabase();
 

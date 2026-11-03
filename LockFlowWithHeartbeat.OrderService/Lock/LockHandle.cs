@@ -1,14 +1,14 @@
-﻿namespace LockFlow.OrderService.LockWithHeartBeat;
+﻿namespace LockFlowWithHeartbeat.OrderService.Lock;
 
 //بهترین طراحی این است که LockHandle خودش مسئول Heartbeat باشد. در این صورت Controller و Worker اصلاً از وجود Timer خبر ندارند.
-public sealed class LockHandleWithHeartBeat : IAsyncDisposable
+public sealed class LockHandle : IAsyncDisposable
 {
     private readonly PeriodicTimer _timer;
     private readonly CancellationTokenSource _cts;
-    private readonly ILockServiceWithHeartBeat _service;
+    private readonly ILockService _service;
     private readonly Task _heartbeatTask;
 
-    internal LockHandleWithHeartBeat(ILockServiceWithHeartBeat service, string key, string value, TimeSpan expiry)
+    internal LockHandle(ILockService service, string key, string value, TimeSpan expiry)
     {
         _service = service;
 
@@ -55,7 +55,7 @@ public sealed class LockHandleWithHeartBeat : IAsyncDisposable
                     if (!ok)
                     {
                         //Lock از دست رفت
-                        //در DistributedLockServiceWithHeartBeat لاگ اش را ثبت میکنیم
+                        //در DistributedLockService لاگ اش را ثبت میکنیم
                         break;
                     }
                 }

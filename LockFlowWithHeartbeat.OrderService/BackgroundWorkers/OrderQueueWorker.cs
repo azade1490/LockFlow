@@ -1,27 +1,27 @@
-using LockFlow.OrderService.Domain.Order.ValueObjects;
-using LockFlow.OrderService.DTO;
-using LockFlow.OrderService.LockWithHeartBeat;
-using LockFlow.OrderService.Persistence.Data;
+using LockFlowWithHeartbeat.OrderService.Domain.Order.ValueObjects;
+using LockFlowWithHeartbeat.OrderService.DTO;
+using LockFlowWithHeartbeat.OrderService.Lock;
+using LockFlowWithHeartbeat.OrderService.Persistence.Data;
 
 using StackExchange.Redis;
 
 using System.Text.Json;
 
-namespace LockFlow.OrderService.BackgroundWorkers;
+namespace LockFlowWithHeartbeat.OrderService.BackgroundWorkers;
 
 //چون BackgroundService با AddSingleton تزریق میشود سرویس های AddScoped مثل کانتکس نباید به BackgroundService تزریق شوند و فقط میتوان آنها را با استفاده از IServiceScopeFactory بگیریم
-public sealed class OrderQueueWorkerWithHeartBeat : BackgroundService
+public sealed class OrderQueueWorker : BackgroundService
 {
     private readonly IConnectionMultiplexer _redis;
     private readonly IServiceScopeFactory _scopeFactory;
-    private readonly ILockServiceWithHeartBeat _lockServiceWithHeartBeat;
+    private readonly ILockService _lockService;
     private readonly ILogger<OrderQueueWorker> _logger;
 
-    public OrderQueueWorkerWithHeartBeat(IConnectionMultiplexer redis,IServiceScopeFactory scopeFactory, ILockServiceWithHeartBeat lockServiceWithHeartBeat, ILogger<OrderQueueWorker> logger)
+    public OrderQueueWorker(IConnectionMultiplexer redis,IServiceScopeFactory scopeFactory, ILockService lockService, ILogger<OrderQueueWorker> logger)
     {
         _redis = redis;
         _scopeFactory = scopeFactory;
-        _lockServiceWithHeartBeat = lockServiceWithHeartBeat;
+        _lockService = lockService;
         _logger = logger;
     }
 
@@ -60,7 +60,7 @@ public sealed class OrderQueueWorkerWithHeartBeat : BackgroundService
         var lockKey = $"lock:product:{orderDto.ProductId}";
         
         // در پایان بلاک قفل به صورت اتوماتیک آزاد می‌شود.
-        await using var lockHandle = await _lockServiceWithHeartBeat.AcquireAsync(lockKey);
+        await using var lockHandle = await _lockService.AcquireAsync(lockKey);
 
         // اگر قفل در اختیار درخواست دیگری باشد
         //اگر از صف RabbitMQ استفاده کنیم نیازی به برگرداندن سفارش به صف نیست چون از صف حذف نشده است
@@ -124,7 +124,7 @@ public sealed class OrderQueueWorkerWithHeartBeat : BackgroundService
                      .GetRequiredService<AppDbContext>();
 
             Address address = new Address("Iran", "Tehran", "Tehran", "street", "123456789");
-            var order = new LockFlow.OrderService.Domain.Order.AggregateRoot.Order(address);
+            var order = new LockFlowWithHeartbeat.OrderService.Domain.Order.AggregateRoot.Order(address);
             var money = new Money(1000000000, "IRR");
             order.AddItem(Guid.NewGuid(), "LapTop", money, orderDto.Quantity);
 
